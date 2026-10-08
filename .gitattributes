@@ -1,0 +1,21 @@
+# Line-ending policy.
+#
+# This repo lives under a home directory where core.autocrlf=true, which would
+# otherwise rewrite these files with CRLF on checkout. Shell scripts with CRLF
+# fail inside WSL with "bad interpreter: /bin/bash^M" or "\r: command not found",
+# so their endings need to be pinned rather than left to the global setting.
+
+*.sh    text eol=lf
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.csv   text eol=lf
+
+# PowerShell scripts are pure ASCII and parse with either ending, but CRLF is
+# the convention on Windows and keeps them readable in Notepad.
+*.ps1   text eol=crlf
+
+# Binary-ish things that must never be touched.
+*.png   binary
+*.jpg   binary
+*.pdf   binary

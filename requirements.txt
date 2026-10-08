@@ -1,0 +1,10 @@
+# Core dependency.
+pymavlink>=2.4.40,<3
+
+# Required by teleop_keyboard.py only, which imports it at module scope. Every
+# other script runs without it.
+pynput>=1.7
+
+# Optional. Only needed for --sitl-pid, which samples the SITL process's own CPU
+# usage on the host. Everything else works without it.
+# psutil>=5.9
