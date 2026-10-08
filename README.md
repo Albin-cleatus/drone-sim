@@ -403,6 +403,25 @@ UTC.
 
 Missing values are written as empty cells, not `nan`.
 
+**On the sign conventions — read this before comparing columns.** `vn_mps`,
+`ve_mps` and `vd_mps` come straight from `LOCAL_POSITION_NED`, which is a
+**north-east-down** frame, so `vd_mps` is **positive when descending**.
+`climb_mps` is the opposite convention, **positive when climbing**. The same
+motion therefore appears as `vd_mps = +2.50` and `climb_mps = −2.50`, which
+looks contradictory until you know which column you are reading. A vehicle
+sitting still reads `0.00` in both.
+
+**Sample logs.** Two recorded runs are kept in `logs/` as worked examples,
+everything else in that directory is ignored:
+
+| File | What it shows |
+|---|---|
+| `logs/telemetry_20261009_041704.csv` | The bug. From t=66.9 s the LOITER hold leaves 5.00 m and descends at a saturated 2.50 m/s (`vd_mps` +2.50, `climb_mps` −2.50), hitting the ground around t=69.2 s. Throttle drops to 0 and altitude parks at −0.09 m. |
+| `logs/verify_loiter.csv` | The fix. All 25 LOITER samples hold 5.00 m with `vd_mps` between 0.00 and −0.01, then RTL climbs to 15 m and lands at 0.50 m/s. |
+
+Comparing the two is the quickest way to see what the throttle override in
+`sitl_mission.py` is actually doing.
+
 **On the CPU number.** `cpu_load_pct` is what the *autopilot* reports about
 itself (`SYS_STATUS.load`). Under SITL that value comes from the simulated
 scheduler, not flight hardware, and in practice it is always **0** — a measured

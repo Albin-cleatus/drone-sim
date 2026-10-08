@@ -1,4 +1,10 @@
-logs/
+# Telemetry output. Two runs are tracked as worked examples — the pre-fix
+# LOITER descent and the post-fix hold that replaced it — so the numbers
+# quoted in the README can be checked rather than taken on trust.
+# See "Sample logs" in README.md.
+logs/*
+!logs/telemetry_20261009_041704.csv
+!logs/verify_loiter.csv
 __pycache__/
 *.pyc
 .venv/
