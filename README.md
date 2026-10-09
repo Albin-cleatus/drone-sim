@@ -274,6 +274,14 @@ Two outputs are easy to misread:
   1.5 m, so "reached" means the vehicle got *inside that circle*; the figures
   above are where each leg ended, not how tightly the controller can converge.
   Tighten `--wp-radius` if you want it to close further.
+
+  They are also not reproducible from the CSV, and that is not a discrepancy.
+  `wp_dist_m` is a cache, refreshed only when the guided target is re-sent at
+  2 Hz, not a per-sample measurement — and acceptance lands between refreshes.
+  In `logs/verify_loiter.csv` the printed figures above read 1.35 / 1.24 /
+  1.49 m, while the last cached value before each waypoint advanced is 3.69 /
+  2.66 / 2.59 m. Nothing is wrong with the run; the log never samples the
+  instant the live check passed.
 - **`SIM Hit ground at ...` is not a crash report.** SITL prints touchdown
   velocity for every landing. 0.50 m/s is `LAND_SPEED` doing its job; a figure
   in the metres-per-second range means something is genuinely wrong.
@@ -403,6 +411,13 @@ UTC.
 
 Missing values are written as empty cells, not `nan`.
 
+**On `wp_dist_m`.** This column is a *cache*, not a measurement. `goto()`
+refreshes it inside the same 2 Hz tick that re-sends the guided target, so
+consecutive samples repeat one value, and the moment a waypoint is accepted
+falls between refreshes — both the acceptance test and the `reached (…)` log
+line use a live distance instead. The CSV therefore will not reproduce the
+printed waypoint figures; see the note under the sample output in section 3.
+
 **On the sign conventions — read this before comparing columns.** `vn_mps`,
 `ve_mps` and `vd_mps` come straight from `LOCAL_POSITION_NED`, which is a
 **north-east-down** frame, so `vd_mps` is **positive when descending**.
@@ -416,7 +431,7 @@ everything else in that directory is ignored:
 
 | File | What it shows |
 |---|---|
-| `logs/telemetry_20261009_041704.csv` | The bug. From t=66.9 s the LOITER hold leaves 5.00 m and descends at a saturated 2.50 m/s (`vd_mps` +2.50, `climb_mps` −2.50), hitting the ground around t=69.2 s. Throttle drops to 0 and altitude parks at −0.09 m. |
+| `logs/telemetry_20261009_041704.csv` | The bug. From t=66.9 s the LOITER hold leaves 5.00 m and descends at a saturated 2.50 m/s (`vd_mps` +2.50, `climb_mps` −2.50), hitting the ground around t=69.2 s, after which altitude parks at −0.09 m. `throttle_pct` is **not** zero during the descent — it dips to 26 and recovers to 34, because the controller is applying throttle to fly the descent it was commanded to fly. It reads 0 only after ground contact, and the vehicle is still armed at that point. |
 | `logs/verify_loiter.csv` | The fix. All 25 LOITER samples hold 5.00 m with `vd_mps` between 0.00 and −0.01, then RTL climbs to 15 m and lands at 0.50 m/s. |
 
 Comparing the two is the quickest way to see what the throttle override in
